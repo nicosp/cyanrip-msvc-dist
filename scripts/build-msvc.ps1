@@ -9,7 +9,7 @@ ilammy/msvc-dev-cmd in CI), with Meson, Ninja and pkgconf on PATH
 (pip install meson ninja pkgconf) and vcpkg in VCPKG_ROOT or
 VCPKG_INSTALLATION_ROOT.
 
-FFmpeg, curl, libxml2 and pthreads4w come from vcpkg; the libraries in
+FFmpeg, curl and libxml2 come from vcpkg; the libraries in
 the submodules are installed into -Prefix, which cyanrip is built
 against.
 
@@ -81,7 +81,7 @@ $ffmpegFeatures = 'core,avcodec,avformat,avfilter,swresample,zlib,ffprobe'
 if ($Static) { $ffmpegFeatures += ',mp3lame,vorbis,opus' }
 if (-not $SkipVcpkg) {
     Invoke-Checked (Join-Path $vcpkgRoot 'vcpkg') install --triplet $Triplet `
-        "ffmpeg[$ffmpegFeatures]" curl libxml2 pthreads
+        "ffmpeg[$ffmpegFeatures]" curl libxml2
 }
 $vcpkg = Join-Path $vcpkgRoot "installed\$Triplet"
 $env:PKG_CONFIG_PATH = "$Prefix\lib\pkgconfig;$vcpkg\lib\pkgconfig"
@@ -119,9 +119,9 @@ Remove-Item Env:CXXFLAGS -ErrorAction SilentlyContinue
 Invoke-Checked cmake --build "$BuildDir\libmusicbrainz" --target musicbrainz5 musicbrainz5cc
 Invoke-Checked cmake --install "$BuildDir\libmusicbrainz"
 
-# cyanrip.  Statically, curl's and pthreads4w's headers must be told so.
+# cyanrip.  Statically, curl's headers must be told so.
 $cyanripOptions = @()
-if ($Static) { $cyanripOptions = @('-Dc_args=-DCURL_STATICLIB -DPTW32_STATIC_LIB -D__PTW32_STATIC_LIB') }
+if ($Static) { $cyanripOptions = @('-Dc_args=-DCURL_STATICLIB') }
 Invoke-MesonSetup "$BuildDir\cyanrip" "$root\cyanrip" $cyanripOptions
 Invoke-Checked meson compile -C "$BuildDir\cyanrip"
 Invoke-Checked meson install -C "$BuildDir\cyanrip"

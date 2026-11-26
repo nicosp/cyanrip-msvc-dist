@@ -111,7 +111,8 @@ jobs:
       - uses: actions/cache/restore@v4
         with:
           path: vcpkg-cache
-          key: vcpkg-msvc-static-${{ steps.vcpkg.outputs.commit }}-ffmpeg-lame-vorbis-opus-curl-libxml2-pthreads
+          key: vcpkg-msvc-static-${{ steps.vcpkg.outputs.commit }}-ffmpeg-lame-vorbis-opus-curl-libxml2
+          restore-keys: vcpkg-msvc-static-${{ steps.vcpkg.outputs.commit }}-
 
       - name: Build
         run: scripts/build-msvc.ps1 -Static
@@ -121,7 +122,7 @@ jobs:
         if: always()
         with:
           path: vcpkg-cache
-          key: vcpkg-msvc-static-${{ steps.vcpkg.outputs.commit }}-ffmpeg-lame-vorbis-opus-curl-libxml2-pthreads
+          key: vcpkg-msvc-static-${{ steps.vcpkg.outputs.commit }}-ffmpeg-lame-vorbis-opus-curl-libxml2
 
       - uses: actions/upload-artifact@v4
         with:
