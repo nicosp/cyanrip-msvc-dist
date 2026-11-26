@@ -115,10 +115,15 @@ do_confmakeinstall() {
     make install
 }
 
-# Configures the CMake project in the current directory, building out of tree
+# Configures the CMake project in the current directory, building out of tree.
+# Static libraries are wanted: on Windows, where import libraries are .a too,
+# CMake is told to find .a archives only, and curl's CMake configuration,
+# which MSYS2 installs for its shared curl, is skipped for the curl built here.
 do_cmake() {
+    local static_args=(-DCURL_NO_CURL_CMAKE=ON)
+    [[ $OS == windows ]] && static_args+=(-DCMAKE_FIND_LIBRARY_SUFFIXES=.a)
     CMAKE_BUILD="$BUILD/_cmake/${PWD##*/}"
-    cmake -S "$(native "$PWD")" -B "$(native "$CMAKE_BUILD")" -G Ninja \
+    cmake -S "$(native "$PWD")" -B "$(native "$CMAKE_BUILD")" -G Ninja "${static_args[@]}" \
         -DBUILD_SHARED_LIBS=OFF \
         -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
         -DCMAKE_INSTALL_PREFIX="$(native "$PREFIX")" \
