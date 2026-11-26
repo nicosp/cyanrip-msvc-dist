@@ -5,8 +5,8 @@
 #
 #   Linux (musl, e.g. Alpine): fully static.
 #   macOS: only system libraries and frameworks are linked dynamically.
-#   MSYS2 UCRT64/MINGW64: fully static; zlib, bzip2, libiconv and libxml2
-#   come from MSYS2's static libraries.
+#   MSYS2 UCRT64/MINGW64: fully static; zlib, bzip2 and libiconv come from
+#   MSYS2's static libraries.
 #
 # Based on cyanrip's .github/static-build.sh, with the same library versions
 # and FFmpeg features.  The toolchain, meson, ninja, cmake, nasm, pkg-config,
@@ -32,10 +32,8 @@ LIBXML2_VERSION=2.15.4
 CHROMAPRINT_VERSION=1.6.2
 
 build_all() {
-    if [[ $OS == darwin ]]; then
-        build_openssl
-        build_libxml2
-    fi
+    [[ $OS == darwin ]] && build_openssl
+    [[ $OS == linux ]] || build_libxml2
     build_curl
     build_libmusicbrainz
     build_libqrencode
@@ -116,14 +114,11 @@ do_confmakeinstall() {
 }
 
 # Configures the CMake project in the current directory, building out of tree.
-# Static libraries are wanted: on Windows, where import libraries are .a too,
-# CMake is told to find .a archives only, and curl's CMake configuration,
-# which MSYS2 installs for its shared curl, is skipped for the curl built here.
+# curl's CMake configuration, which MSYS2 installs for its shared curl, is
+# skipped, so the static curl built here is used.
 do_cmake() {
-    local static_args=(-DCURL_NO_CURL_CMAKE=ON)
-    [[ $OS == windows ]] && static_args+=(-DCMAKE_FIND_LIBRARY_SUFFIXES=.a)
     CMAKE_BUILD="$BUILD/_cmake/${PWD##*/}"
-    cmake -S "$(native "$PWD")" -B "$(native "$CMAKE_BUILD")" -G Ninja "${static_args[@]}" \
+    cmake -S "$(native "$PWD")" -B "$(native "$CMAKE_BUILD")" -G Ninja -DCURL_NO_CURL_CMAKE=ON \
         -DBUILD_SHARED_LIBS=OFF \
         -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
         -DCMAKE_INSTALL_PREFIX="$(native "$PREFIX")" \
@@ -157,8 +152,10 @@ build_openssl() {
     make install_sw
 }
 
-# macOS only: the SDK's libxml2 has no pkg-config file, which libmusicbrainz
-# needs to find it
+# Not on Linux, which has a static libxml2.  The macOS SDK's has no
+# pkg-config file, which libmusicbrainz needs to find it.  MSYS2 has the DLL
+# beside the static library, and CMake takes the DLL's import library, so
+# libmusicbrainz would be built for the DLL while cyanrip links statically.
 build_libxml2() {
     do_tarball "https://download.gnome.org/sources/libxml2/${LIBXML2_VERSION%.*}/libxml2-$LIBXML2_VERSION.tar.xz" "libxml2-$LIBXML2_VERSION"
     do_confmakeinstall --without-python --without-lzma --without-icu \

@@ -71,7 +71,7 @@ jobs:
           install: git base-devel autotools
           pacboy: >-
             toolchain:p meson:p ninja:p cmake:p nasm:p pkgconf:p python:p
-            libxml2:p zlib:p bzip2:p libiconv:p xz:p
+            zlib:p bzip2:p libiconv:p xz:p
 
       - name: Build
         run: scripts/build-static.sh
