@@ -30,8 +30,14 @@ mkdir -p "$prefix" "$build"
 if [ "${INSTALL_DEPS:-1}" = 1 ]; then
     p=$MINGW_PACKAGE_PREFIX
     pacman -S --needed --noconfirm "$p-toolchain" "$p-meson" "$p-ninja" "$p-cmake" \
-        "$p-pkgconf" "$p-ffmpeg" "$p-curl" "$p-libxml2" "$p-libiconv" "$p-python" \
-        "$p-qrencode" "$p-chromaprint"
+        "$p-pkgconf" "$p-ffmpeg" "$p-curl" "$p-libxml2" "$p-libiconv" "$p-python"
+    # Optional: QR codes for MusicBrainz submissions, AcoustID fingerprints.
+    # MSYS2 no longer has them for MINGW64; where they are missing cyanrip is
+    # built without them.
+    for opt in qrencode chromaprint; do
+        pacman -S --needed --noconfirm "$p-$opt" ||
+            echo "$p-$opt is not available, building cyanrip without it"
+    done
 fi
 
 # Meson and CMake are native Windows programs: give them Windows paths
