@@ -30,7 +30,9 @@ What has been proposed upstream so far:
 - libcdio-paranoia: [libcdio-paranoia#66](https://github.com/libcdio/libcdio-paranoia/pull/66)
   fixes the MSVC build.
 - cyanrip: [cyanrip#173](https://github.com/cyanreg/cyanrip/pull/173)
-  stops embedding cover art FFmpeg can't read. The `msvc` branch is based
+  stops embedding cover art FFmpeg can't read, and
+  [cyanrip#174](https://github.com/cyanreg/cyanrip/pull/174) runs the image
+  tests in Python's UTF-8 mode, which they need on Windows. The `msvc` branch is based
   on [cyanrip#153](https://github.com/cyanreg/cyanrip/pull/153), the pregap
   detection work.
 
