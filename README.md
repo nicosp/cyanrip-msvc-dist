@@ -1,8 +1,14 @@
 # cyanrip for Windows: MSVC and MinGW builds
 
-This repository builds [cyanrip](https://github.com/cyanreg/cyanrip) and the
-libraries it needs from the branches that let them build with MSVC, and
-runs cyanrip's tests. Each library is a submodule:
+> **This is an experiment.** It is a place to work out first-class
+> support for [cyanrip](https://github.com/cyanreg/cyanrip) on Windows
+> with MSVC, alongside MinGW, across cyanrip and the libraries it needs.
+> Once all of the changes below are upstreamed, this repository will be
+> archived or deleted. Build from the upstream projects then.
+
+This repository builds cyanrip and the libraries it needs from the
+branches that let them build with MSVC, and runs cyanrip's tests. Each
+library is a submodule:
 
 | Submodule | Branch | What it adds |
 |---|---|---|
@@ -13,6 +19,26 @@ runs cyanrip's tests. Each library is a submodule:
 
 The same branches are built with MinGW as well, so neither toolchain
 regresses.
+
+## Upstream status
+
+What has been proposed upstream so far:
+
+- libcdio: [libcdio-C#127](https://github.com/libcdio/libcdio-C/issues/127)
+  proposes the Meson build. [libcdio-C#130](https://github.com/libcdio/libcdio-C/pull/130)
+  finds a CUE sheet's files next to it on Windows.
+- libcdio-paranoia: [libcdio-paranoia#66](https://github.com/libcdio/libcdio-paranoia/pull/66)
+  fixes the MSVC build.
+- cyanrip: [cyanrip#173](https://github.com/cyanreg/cyanrip/pull/173)
+  stops embedding cover art FFmpeg can't read. The `msvc` branch is based
+  on [cyanrip#153](https://github.com/cyanreg/cyanrip/pull/153), the pregap
+  detection work.
+
+Still only in the branches here:
+
+- the Meson build and export macros of libcdio and libcdio-paranoia;
+- libmusicbrainz's libcurl port and MSVC fixes;
+- cyanrip's MSVC build itself, and splitting paths at backslashes.
 
 ## Getting the sources
 
