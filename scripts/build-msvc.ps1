@@ -10,9 +10,8 @@ ilammy/msvc-dev-cmd in CI), with Meson, Ninja and pkgconf on PATH
 VCPKG_INSTALLATION_ROOT.
 
 FFmpeg, curl, libxml2, libqrencode and chromaprint come from vcpkg; the
-libraries in
-the submodules are installed into -Prefix, which cyanrip is built
-against.
+libraries in the submodules are installed into -Prefix, which cyanrip is
+built against.
 
 With -Static everything is linked statically, with the static CRT, into
 one cyanrip.exe that needs no DLLs; it's copied to
