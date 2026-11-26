@@ -1,0 +1,99 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      latest:
+        description: Build the tip of each submodule's branch instead of the pinned commits
+        type: boolean
+        default: false
+
+jobs:
+  msvc:
+    runs-on: windows-latest
+    env:
+      VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg-cache
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Update the submodules to their branches
+        if: inputs.latest
+        run: git submodule update --remote
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Meson
+        run: pip install meson ninja pkgconf
+
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Get the vcpkg version
+        id: vcpkg
+        run: |
+          New-Item -ItemType Directory -Force $env:VCPKG_DEFAULT_BINARY_CACHE | Out-Null
+          "commit=$(git -C $env:VCPKG_INSTALLATION_ROOT rev-parse HEAD)" >> $env:GITHUB_OUTPUT
+
+      - uses: actions/cache/restore@v4
+        with:
+          path: vcpkg-cache
+          key: vcpkg-msvc-${{ steps.vcpkg.outputs.commit }}-ffmpeg-zlib-curl-libxml2-pthreads
+
+      - name: Build and test
+        run: scripts/build-msvc.ps1
+
+      # Even when the build fails, so the next run doesn't rebuild FFmpeg
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: vcpkg-cache
+          key: vcpkg-msvc-${{ steps.vcpkg.outputs.commit }}-ffmpeg-zlib-curl-libxml2-pthreads
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: msvc-testlog
+          path: _build/msvc/cyanrip/meson-logs/testlog.txt
+          if-no-files-found: ignore
+
+  mingw:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        sys: [ucrt64, mingw64]
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Update the submodules to their branches
+        if: inputs.latest
+        shell: bash
+        run: git submodule update --remote
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.sys }}
+          update: true
+
+      - name: Build and test
+        run: scripts/build-mingw.sh
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ${{ matrix.sys }}-testlog
+          path: _build/${{ matrix.sys }}/cyanrip/meson-logs/testlog.txt
+          if-no-files-found: ignore

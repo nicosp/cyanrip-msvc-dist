@@ -1,0 +1,16 @@
+[submodule "libcdio-C"]
+	path = libcdio-C
+	url = https://github.com/nicosp/libcdio-C.git
+	branch = export-macros
+[submodule "libcdio-paranoia"]
+	path = libcdio-paranoia
+	url = https://github.com/nicosp/libcdio-paranoia.git
+	branch = meson-export-symbols
+[submodule "libmusicbrainz"]
+	path = libmusicbrainz
+	url = https://github.com/nicosp/libmusicbrainz.git
+	branch = msvc-fixes
+[submodule "cyanrip"]
+	path = cyanrip
+	url = https://github.com/nicosp/cyanrip.git
+	branch = msvc
