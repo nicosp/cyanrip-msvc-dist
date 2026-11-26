@@ -115,17 +115,22 @@ do_confmakeinstall() {
     make install
 }
 
-do_cmakeinstall() {
-    local src=${CMAKE_SOURCE:-.}
-    cmake -S "$(native "$src")" -B "$(native "$BUILD/_cmake/${PWD##*/}")" -G Ninja \
+# Configures the CMake project in the current directory, building out of tree
+do_cmake() {
+    CMAKE_BUILD="$BUILD/_cmake/${PWD##*/}"
+    cmake -S "$(native "$PWD")" -B "$(native "$CMAKE_BUILD")" -G Ninja \
         -DBUILD_SHARED_LIBS=OFF \
         -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
         -DCMAKE_INSTALL_PREFIX="$(native "$PREFIX")" \
         -DCMAKE_INSTALL_LIBDIR=lib \
         -DCMAKE_PREFIX_PATH="$(native "$PREFIX")" \
         -DCMAKE_BUILD_TYPE=Release "$@"
-    ninja -C "$(native "$BUILD/_cmake/${PWD##*/}")"
-    ninja -C "$(native "$BUILD/_cmake/${PWD##*/}")" install
+}
+
+do_cmakeinstall() {
+    do_cmake "$@"
+    ninja -C "$(native "$CMAKE_BUILD")"
+    ninja -C "$(native "$CMAKE_BUILD")" install
 }
 
 do_mesoninstall() {
@@ -180,7 +185,13 @@ build_libmusicbrainz() {
     local cxxlib=-lstdc++
     [[ $OS == darwin ]] && cxxlib=-lc++
     cd "$ROOT/libmusicbrainz"
-    do_cmakeinstall
+    # The code generator links the static libxml2, which needs its own
+    # libraries (zlib, iconv) added
+    do_cmake -DCMAKE_EXE_LINKER_FLAGS="$(pkg-config --static --libs libxml-2.0)"
+    # Only the libraries (and the generator they need): the examples and
+    # tests would need all of curl's static libraries too
+    ninja -C "$(native "$CMAKE_BUILD")" musicbrainz5 musicbrainz5cc
+    cmake --install "$(native "$CMAKE_BUILD")"
     # As for chromaprint: linking the C++ library statically into a C
     # program needs the C++ runtime, which the pkg-config file leaves out
     echo "Libs.private: $cxxlib" >> "$PREFIX/lib/pkgconfig/libmusicbrainz5cc.pc"

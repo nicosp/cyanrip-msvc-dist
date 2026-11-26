@@ -53,9 +53,12 @@ function Invoke-MesonSetup {
     param([string]$Build, [string]$Source, [string[]]$Options)
     $reconfigure = @()
     if (Test-Path (Join-Path $Build 'meson-private')) { $reconfigure = @('--reconfigure') }
-    # (PowerShell names aren't case-sensitive, so this can't be $static)
+    # (PowerShell names aren't case-sensitive, so this can't be $static.)
+    # Only cyanrip, which links everything, needs --prefer-static: with
+    # MSVC it keeps Meson from finding system libraries such as winmm.
     $staticOptions = @()
-    if ($Static) { $staticOptions = @('--default-library=static', '--prefer-static', '-Db_vscrt=mt') }
+    if ($Static) { $staticOptions = @('--default-library=static', '-Db_vscrt=mt') }
+    if ($Static -and $Source -eq "$root\cyanrip") { $staticOptions += '--prefer-static' }
     Invoke-Checked meson setup @reconfigure $Build $Source --prefix $Prefix --buildtype $BuildType @staticOptions @Options
 }
 
