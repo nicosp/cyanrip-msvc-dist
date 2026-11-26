@@ -182,19 +182,8 @@ build_curl() {
 
 # From the submodule: the libcurl port, so no neon
 build_libmusicbrainz() {
-    local cxxlib=-lstdc++
-    [[ $OS == darwin ]] && cxxlib=-lc++
     cd "$ROOT/libmusicbrainz"
-    # The code generator links the static libxml2, which needs its own
-    # libraries (zlib, iconv) added
-    do_cmake -DCMAKE_EXE_LINKER_FLAGS="$(pkg-config --static --libs libxml-2.0)"
-    # Only the libraries (and the generator they need): the examples and
-    # tests would need all of curl's static libraries too
-    ninja -C "$(native "$CMAKE_BUILD")" musicbrainz5 musicbrainz5cc
-    cmake --install "$(native "$CMAKE_BUILD")"
-    # As for chromaprint: linking the C++ library statically into a C
-    # program needs the C++ runtime, which the pkg-config file leaves out
-    echo "Libs.private: $cxxlib" >> "$PREFIX/lib/pkgconfig/libmusicbrainz5cc.pc"
+    do_cmakeinstall
 }
 
 build_libqrencode() {
