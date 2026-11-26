@@ -79,8 +79,9 @@ pip install meson ninja pkgconf
 scripts\build-msvc.ps1
 ```
 
-FFmpeg (with zlib, for PNG cover art), curl and libxml2 come
-from vcpkg. The first build of FFmpeg takes a while. The script builds the
+FFmpeg (with zlib, for PNG cover art), curl, libxml2, libqrencode (QR
+codes for MusicBrainz submissions) and chromaprint (AcoustID fingerprints)
+come from vcpkg. The first build of FFmpeg takes a while. The script builds the
 libraries in `_build\msvc`, installs them in `_install\msvc`, builds
 cyanrip against them and runs its tests. Options:
 

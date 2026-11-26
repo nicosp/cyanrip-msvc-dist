@@ -9,7 +9,8 @@ ilammy/msvc-dev-cmd in CI), with Meson, Ninja and pkgconf on PATH
 (pip install meson ninja pkgconf) and vcpkg in VCPKG_ROOT or
 VCPKG_INSTALLATION_ROOT.
 
-FFmpeg, curl and libxml2 come from vcpkg; the libraries in
+FFmpeg, curl, libxml2, libqrencode and chromaprint come from vcpkg; the
+libraries in
 the submodules are installed into -Prefix, which cyanrip is built
 against.
 
@@ -81,7 +82,7 @@ $ffmpegFeatures = 'core,avcodec,avformat,avfilter,swresample,zlib,ffprobe'
 if ($Static) { $ffmpegFeatures += ',mp3lame,vorbis,opus' }
 if (-not $SkipVcpkg) {
     Invoke-Checked (Join-Path $vcpkgRoot 'vcpkg') install --triplet $Triplet `
-        "ffmpeg[$ffmpegFeatures]" curl libxml2
+        "ffmpeg[$ffmpegFeatures]" curl libxml2 libqrencode chromaprint
 }
 $vcpkg = Join-Path $vcpkgRoot "installed\$Triplet"
 $env:PKG_CONFIG_PATH = "$Prefix\lib\pkgconfig;$vcpkg\lib\pkgconfig"
