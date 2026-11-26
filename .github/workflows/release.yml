@@ -1,0 +1,149 @@
+name: Release
+
+# Static cyanrip binaries for Linux, macOS and Windows (MinGW and MSVC).
+# Each build runs cyanrip's tests.  They are uploaded as artifacts on every
+# run, and attached to the release when one is published.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    # musl, for a fully static binary
+    container: alpine:3.22
+    steps:
+      - name: Install dependencies
+        run: |
+          apk add bash build-base meson ninja pkgconf cmake nasm autoconf automake libtool \
+            git curl tar xz xz-dev xz-static bzip2 bzip2-dev bzip2-static zlib-dev zlib-static \
+            openssl-dev openssl-libs-static libxml2-dev libxml2-static linux-headers python3
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Build
+        shell: bash
+        run: |
+          git config --global --add safe.directory '*'
+          scripts/build-static.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cyanrip-linux-x86_64
+          path: dist/cyanrip-linux-x86_64
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Install dependencies
+        run: brew install meson ninja pkg-config cmake nasm autoconf automake libtool
+
+      - name: Build
+        run: scripts/build-static.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cyanrip-darwin-aarch64
+          path: dist/cyanrip-darwin-aarch64
+
+  mingw:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: git base-devel autotools
+          pacboy: >-
+            toolchain:p meson:p ninja:p cmake:p nasm:p pkgconf:p python:p
+            libxml2:p zlib:p bzip2:p libiconv:p xz:p
+
+      - name: Build
+        run: scripts/build-static.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cyanrip-windows-x86_64-ucrt64
+          path: dist/cyanrip-windows-x86_64-ucrt64.exe
+
+  msvc:
+    runs-on: windows-latest
+    env:
+      VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg-cache
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Meson
+        run: pip install meson ninja pkgconf
+
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Get the vcpkg version
+        id: vcpkg
+        run: |
+          New-Item -ItemType Directory -Force $env:VCPKG_DEFAULT_BINARY_CACHE | Out-Null
+          "commit=$(git -C $env:VCPKG_INSTALLATION_ROOT rev-parse HEAD)" >> $env:GITHUB_OUTPUT
+
+      - uses: actions/cache/restore@v4
+        with:
+          path: vcpkg-cache
+          key: vcpkg-msvc-static-${{ steps.vcpkg.outputs.commit }}-ffmpeg-lame-vorbis-opus-curl-libxml2-pthreads
+
+      - name: Build
+        run: scripts/build-msvc.ps1 -Static
+
+      # Even when the build fails, so the next run doesn't rebuild FFmpeg
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: vcpkg-cache
+          key: vcpkg-msvc-static-${{ steps.vcpkg.outputs.commit }}-ffmpeg-lame-vorbis-opus-curl-libxml2-pthreads
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cyanrip-windows-x86_64-msvc
+          path: dist/cyanrip-windows-x86_64-msvc.exe
+
+  release:
+    if: github.event_name == 'release'
+    needs: [linux, macos, mingw, msvc]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Attach the binaries to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls -l dist
+          gh release upload "${{ github.event.release.tag_name }}" dist/* \
+            --repo "${{ github.repository }}" --clobber

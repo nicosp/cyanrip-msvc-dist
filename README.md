@@ -97,6 +97,34 @@ It installs the packages it needs with pacman (skip that with
 installs it in `_install/<msystem>`. `BUILDTYPE`, `PREFIX`, `BUILD_DIR` and
 `SKIP_TESTS=1` change the defaults.
 
+## Static release binaries
+
+`scripts/build-static.sh` builds one static `cyanrip` binary into `dist/`:
+
+- **Linux:** run it on a musl system such as Alpine, for a fully static binary.
+- **macOS:** only system libraries stay dynamic.
+- **Windows:** run it from an MSYS2 UCRT64 or MINGW64 shell, for a fully static `.exe`.
+
+It builds every library from source: the ones in the submodules, plus
+curl, LAME, Ogg, Vorbis, Opus, FFmpeg, libqrencode and chromaprint. It uses
+the versions and FFmpeg features of cyanrip's own release builds, then runs
+cyanrip's tests.
+
+`scripts\build-msvc.ps1 -Static` does the same with MSVC: vcpkg's
+`x64-windows-static` triplet and the static CRT, giving
+`dist\cyanrip-windows-x86_64-msvc.exe`, which needs no DLLs.
+
+`.github/workflows/release.yml` builds all four:
+
+- `cyanrip-linux-x86_64`
+- `cyanrip-darwin-aarch64`
+- `cyanrip-windows-x86_64-ucrt64.exe`
+- `cyanrip-windows-x86_64-msvc.exe`
+
+It uploads them as artifacts and attaches them to the GitHub release
+when one is published. Run it by hand to get the artifacts without a
+release.
+
 ## CI
 
 `.github/workflows/build.yml` runs both scripts on GitHub's Windows

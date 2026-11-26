@@ -12,13 +12,19 @@ VCPKG_INSTALLATION_ROOT.
 FFmpeg, curl, libxml2 and pthreads4w come from vcpkg; the libraries in
 the submodules are installed into -Prefix, which cyanrip is built
 against.
+
+With -Static everything is linked statically, with the static CRT, into
+one cyanrip.exe that needs no DLLs; it's copied to
+dist\cyanrip-windows-x86_64-msvc.exe.  FFmpeg then also gets LAME, Vorbis
+and Opus, like the other release builds.
 #>
 param(
-    [string]$Prefix = (Join-Path $PSScriptRoot '..\_install\msvc'),
-    [string]$BuildDir = (Join-Path $PSScriptRoot '..\_build\msvc'),
+    [switch]$Static,
+    [string]$Prefix,
+    [string]$BuildDir,
     [ValidateSet('release', 'debugoptimized')]
     [string]$BuildType = 'release',
-    [string]$Triplet = 'x64-windows',
+    [string]$Triplet,
     # Skip installing the vcpkg packages, when they already are
     [switch]$SkipVcpkg,
     [switch]$SkipTests
@@ -26,6 +32,10 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+$flavour = if ($Static) { 'msvc-static' } else { 'msvc' }
+if (-not $Prefix) { $Prefix = Join-Path $root "_install\$flavour" }
+if (-not $BuildDir) { $BuildDir = Join-Path $root "_build\$flavour" }
+if (-not $Triplet) { $Triplet = if ($Static) { 'x64-windows-static' } else { 'x64-windows' } }
 New-Item -ItemType Directory -Force $Prefix, $BuildDir | Out-Null
 $Prefix = (Resolve-Path $Prefix).Path
 $BuildDir = (Resolve-Path $BuildDir).Path
@@ -43,7 +53,10 @@ function Invoke-MesonSetup {
     param([string]$Build, [string]$Source, [string[]]$Options)
     $reconfigure = @()
     if (Test-Path (Join-Path $Build 'meson-private')) { $reconfigure = @('--reconfigure') }
-    Invoke-Checked meson setup @reconfigure $Build $Source --prefix $Prefix --buildtype $BuildType @Options
+    # (PowerShell names aren't case-sensitive, so this can't be $static)
+    $staticOptions = @()
+    if ($Static) { $staticOptions = @('--default-library=static', '--prefer-static', '-Db_vscrt=mt') }
+    Invoke-Checked meson setup @reconfigure $Build $Source --prefix $Prefix --buildtype $BuildType @staticOptions @Options
 }
 
 if (-not (Get-Command cl.exe -ErrorAction SilentlyContinue)) {
@@ -64,9 +77,11 @@ if (Get-Command pkgconf -ErrorAction SilentlyContinue) { $env:PKG_CONFIG = 'pkgc
 
 # Dependencies from vcpkg.  FFmpeg needs zlib for PNG cover art, and
 # ffprobe for some of the tests.
+$ffmpegFeatures = 'core,avcodec,avformat,avfilter,swresample,zlib,ffprobe'
+if ($Static) { $ffmpegFeatures += ',mp3lame,vorbis,opus' }
 if (-not $SkipVcpkg) {
     Invoke-Checked (Join-Path $vcpkgRoot 'vcpkg') install --triplet $Triplet `
-        'ffmpeg[core,avcodec,avformat,avfilter,swresample,zlib,ffprobe]' curl libxml2 pthreads
+        "ffmpeg[$ffmpegFeatures]" curl libxml2 pthreads
 }
 $vcpkg = Join-Path $vcpkgRoot "installed\$Triplet"
 $env:PKG_CONFIG_PATH = "$Prefix\lib\pkgconfig;$vcpkg\lib\pkgconfig"
@@ -87,15 +102,27 @@ Invoke-Checked meson install -C "$BuildDir\libcdio-paranoia"
 # libmusicbrainz.  Its install directories are made absolute from the
 # prefix given here, so it can't be changed at install time.
 $cmakeType = if ($BuildType -eq 'release') { 'Release' } else { 'RelWithDebInfo' }
+$cmakeStatic = @()
+if ($Static) {
+    # The static CRT, which needs a newer policy than the project asks for.
+    # curl's and libxml2's headers declare their functions dllimport unless
+    # told the libraries are static.
+    $cmakeStatic = @('-DBUILD_SHARED_LIBS=OFF', '-DCMAKE_POLICY_DEFAULT_CMP0091=NEW',
+                     '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded')
+    $env:CXXFLAGS = '/DCURL_STATICLIB /DLIBXML_STATIC'
+}
 Invoke-Checked cmake -S "$root\libmusicbrainz" -B "$BuildDir\libmusicbrainz" -G Ninja `
     "-DCMAKE_BUILD_TYPE=$cmakeType" "-DCMAKE_INSTALL_PREFIX=$($Prefix -replace '\\', '/')" `
     "-DCMAKE_TOOLCHAIN_FILE=$vcpkgRoot\scripts\buildsystems\vcpkg.cmake" `
-    "-DVCPKG_TARGET_TRIPLET=$Triplet"
+    "-DVCPKG_TARGET_TRIPLET=$Triplet" @cmakeStatic
+Remove-Item Env:CXXFLAGS -ErrorAction SilentlyContinue
 Invoke-Checked cmake --build "$BuildDir\libmusicbrainz" --target musicbrainz5 musicbrainz5cc
 Invoke-Checked cmake --install "$BuildDir\libmusicbrainz"
 
-# cyanrip
-Invoke-MesonSetup "$BuildDir\cyanrip" "$root\cyanrip" @()
+# cyanrip.  Statically, curl's and pthreads4w's headers must be told so.
+$cyanripOptions = @()
+if ($Static) { $cyanripOptions = @('-Dc_args=-DCURL_STATICLIB -DPTW32_STATIC_LIB -D__PTW32_STATIC_LIB') }
+Invoke-MesonSetup "$BuildDir\cyanrip" "$root\cyanrip" $cyanripOptions
 Invoke-Checked meson compile -C "$BuildDir\cyanrip"
 Invoke-Checked meson install -C "$BuildDir\cyanrip"
 
@@ -103,4 +130,11 @@ if (-not $SkipTests) {
     Invoke-Checked meson test -C "$BuildDir\cyanrip" --print-errorlogs
 }
 
-Write-Host "cyanrip is installed in $Prefix\bin; it needs $vcpkg\bin on PATH to run."
+if ($Static) {
+    $dist = Join-Path $root 'dist'
+    New-Item -ItemType Directory -Force $dist | Out-Null
+    Copy-Item "$BuildDir\cyanrip\src\cyanrip.exe" "$dist\cyanrip-windows-x86_64-msvc.exe"
+    Write-Host "Built dist\cyanrip-windows-x86_64-msvc.exe"
+} else {
+    Write-Host "cyanrip is installed in $Prefix\bin; it needs $vcpkg\bin on PATH to run."
+}
