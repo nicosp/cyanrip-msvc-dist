@@ -22,25 +22,34 @@ regresses.
 
 ## Upstream status
 
-What has been proposed upstream so far:
+Proposed upstream so far:
 
-- libcdio: [libcdio-C#127](https://github.com/libcdio/libcdio-C/issues/127)
-  proposes the Meson build. [libcdio-C#130](https://github.com/libcdio/libcdio-C/pull/130)
-  finds a CUE sheet's files next to it on Windows.
-- libcdio-paranoia: [libcdio-paranoia#66](https://github.com/libcdio/libcdio-paranoia/pull/66)
-  fixes the MSVC build.
-- cyanrip: [cyanrip#173](https://github.com/cyanreg/cyanrip/pull/173)
-  stops embedding cover art FFmpeg can't read, and
-  [cyanrip#174](https://github.com/cyanreg/cyanrip/pull/174) runs the image
-  tests in Python's UTF-8 mode, which they need on Windows. The `msvc` branch is based
-  on [cyanrip#153](https://github.com/cyanreg/cyanrip/pull/153), the pregap
-  detection work.
+| Project | Change | Status |
+|---|---|---|
+| libcdio | [libcdio-C#127](https://github.com/libcdio/libcdio-C/issues/127): a Meson build alongside autotools | proposed |
+| libcdio | [libcdio-C#130](https://github.com/libcdio/libcdio-C/pull/130): find a CUE sheet's files next to it on Windows | open |
+| libcdio | [libcdio-C#131](https://github.com/libcdio/libcdio-C/pull/131): read the CD-TEXT that `cdrdao read-toc` writes | open |
+| libcdio-paranoia | [libcdio-paranoia#66](https://github.com/libcdio/libcdio-paranoia/pull/66): build with MSVC | open |
+| libcdio-paranoia | [libcdio-paranoia#68](https://github.com/libcdio/libcdio-paranoia/pull/68): LF line endings on Windows, and `pod2c.pl` stripping CRLF | merged |
+| cyanrip | [cyanrip#153](https://github.com/cyanreg/cyanrip/pull/153): complete pregap detection (the `msvc` branch is based on it) | open |
+| cyanrip | [cyanrip#170](https://github.com/cyanreg/cyanrip/pull/170): rip disc images without paranoia by default | open |
+| cyanrip | [cyanrip#173](https://github.com/cyanreg/cyanrip/pull/173): don't embed cover art FFmpeg can't read | open |
+| cyanrip | [cyanrip#174](https://github.com/cyanreg/cyanrip/pull/174): run the image tests in Python's UTF-8 mode | open |
+| cyanrip | [cyanrip#175](https://github.com/cyanreg/cyanrip/pull/175): FIFO waits re-check their condition after waking | open |
+| cyanrip | [cyanrip#176](https://github.com/cyanreg/cyanrip/pull/176): keep the drive offset search within its buffer and radius | open |
 
 Still only in the branches here:
 
-- the Meson build and export macros of libcdio and libcdio-paranoia;
-- libmusicbrainz's libcurl port and MSVC fixes;
-- cyanrip's MSVC build itself, and splitting paths at backslashes.
+- libcdio and libcdio-paranoia:
+  - the Meson builds, and their fixes for static linking with `prefer_static`;
+  - the export macros.
+- libmusicbrainz:
+  - the libcurl port;
+  - the MSVC fixes and export macros;
+  - static linking of curl and libxml2 with their own dependencies.
+- cyanrip:
+  - the MSVC build, including its Windows threads in place of pthreads4w;
+  - splitting paths at backslashes on Windows.
 
 ## Getting the sources
 
