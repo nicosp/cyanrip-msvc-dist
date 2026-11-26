@@ -30,7 +30,8 @@ mkdir -p "$prefix" "$build"
 if [ "${INSTALL_DEPS:-1}" = 1 ]; then
     p=$MINGW_PACKAGE_PREFIX
     pacman -S --needed --noconfirm "$p-toolchain" "$p-meson" "$p-ninja" "$p-cmake" \
-        "$p-pkgconf" "$p-ffmpeg" "$p-curl" "$p-libxml2" "$p-libiconv" "$p-python"
+        "$p-pkgconf" "$p-ffmpeg" "$p-curl" "$p-libxml2" "$p-libiconv" "$p-python" \
+        "$p-qrencode" "$p-chromaprint"
 fi
 
 # Meson and CMake are native Windows programs: give them Windows paths
