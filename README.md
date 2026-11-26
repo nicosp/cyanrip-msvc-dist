@@ -59,7 +59,9 @@ git commit -am "Update the submodules"
 ## Building with MSVC
 
 From a Visual Studio developer PowerShell, with
-[vcpkg](https://vcpkg.io) cloned somewhere and `VCPKG_ROOT` pointing at it:
+[vcpkg](https://vcpkg.io) cloned and bootstrapped somewhere and `VCPKG_ROOT`
+pointing at it. The vcpkg that comes with Visual Studio only works with
+manifests, so it won't do.
 
 ```powershell
 pip install meson ninja pkgconf

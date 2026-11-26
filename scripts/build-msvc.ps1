@@ -49,8 +49,16 @@ function Invoke-MesonSetup {
 if (-not (Get-Command cl.exe -ErrorAction SilentlyContinue)) {
     throw 'cl.exe not found: run this from a Visual Studio developer PowerShell'
 }
-$vcpkgRoot = if ($env:VCPKG_ROOT) { $env:VCPKG_ROOT } else { $env:VCPKG_INSTALLATION_ROOT }
-if (-not $vcpkgRoot) { throw 'Set VCPKG_ROOT to your vcpkg checkout' }
+# The vcpkg that comes with Visual Studio, which its developer shells put in
+# VCPKG_ROOT, only works with manifests: use a full checkout, which has the
+# ports.  GitHub's runners have one in VCPKG_INSTALLATION_ROOT.
+$vcpkgRoot = @($env:VCPKG_ROOT, $env:VCPKG_INSTALLATION_ROOT) |
+    Where-Object { $_ -and (Test-Path (Join-Path $_ 'ports')) } |
+    Select-Object -First 1
+if (-not $vcpkgRoot) {
+    throw 'No vcpkg checkout found: clone https://github.com/microsoft/vcpkg, bootstrap it and set VCPKG_ROOT to it'
+}
+Write-Host "Using vcpkg in $vcpkgRoot"
 # The pkg-config Strawberry Perl puts on PATH doesn't work with Meson
 if (Get-Command pkgconf -ErrorAction SilentlyContinue) { $env:PKG_CONFIG = 'pkgconf' }
 
