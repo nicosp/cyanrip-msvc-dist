@@ -30,6 +30,7 @@ Proposed upstream so far:
 | libcdio | [libcdio-C#130](https://github.com/libcdio/libcdio-C/pull/130): find a CUE sheet's files next to it on Windows | open |
 | libcdio | [libcdio-C#131](https://github.com/libcdio/libcdio-C/pull/131): read the CD-TEXT that `cdrdao read-toc` writes | open |
 | libcdio | [libcdio-C#132](https://github.com/libcdio/libcdio-C/pull/132): read a CD-Extra's TOC on Windows, and fail MMC commands the drive rejects | open |
+| libcdio | [libcdio-C#133](https://github.com/libcdio/libcdio-C/pull/133): a workaround for Wine missing `IOCTL_CDROM_GET_LAST_SESSION` | open |
 | libcdio-paranoia | [libcdio-paranoia#66](https://github.com/libcdio/libcdio-paranoia/pull/66): build with MSVC | open |
 | libcdio-paranoia | [libcdio-paranoia#68](https://github.com/libcdio/libcdio-paranoia/pull/68): LF line endings on Windows, and `pod2c.pl` stripping CRLF | merged |
 | cyanrip | [cyanrip#153](https://github.com/cyanreg/cyanrip/pull/153): complete pregap detection (the `msvc` branch is based on it) | open |
@@ -43,8 +44,7 @@ Still only in the branches here:
 
 - libcdio and libcdio-paranoia:
   - the Meson builds, and their fixes for static linking with `prefer_static`;
-  - the export macros;
-  - a workaround for Wine missing `IOCTL_CDROM_GET_LAST_SESSION`.
+  - the export macros.
 - libmusicbrainz:
   - the libcurl port;
   - the MSVC fixes and export macros;
