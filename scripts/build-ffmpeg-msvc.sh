@@ -36,11 +36,3 @@ cd "ffmpeg-$FFMPEG_VERSION"
     { tail -n 40 ffbuild/config.log; exit 1; }
 make -j"$(nproc)"
 make install
-
-# FFmpeg names its MSVC libraries libNAME.a; Meson and the .pc files look for
-# NAME.lib, as vcpkg's port installs them
-libdir=$(cygpath -u "$prefix")/lib
-for a in "$libdir"/lib*.a; do
-    lib=$(basename "$a" .a)
-    mv "$a" "$libdir/${lib#lib}.lib"
-done
