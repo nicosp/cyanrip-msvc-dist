@@ -33,6 +33,7 @@ Proposed upstream so far:
 | libcdio | [libcdio-C#133](https://github.com/libcdio/libcdio-C/pull/133): a workaround for Wine missing `IOCTL_CDROM_GET_LAST_SESSION` | open |
 | libcdio-paranoia | [libcdio-paranoia#66](https://github.com/libcdio/libcdio-paranoia/pull/66): build with MSVC | open |
 | libcdio-paranoia | [libcdio-paranoia#68](https://github.com/libcdio/libcdio-paranoia/pull/68): LF line endings on Windows, and `pod2c.pl` stripping CRLF | merged |
+| libmusicbrainz | [libmusicbrainz#22](https://github.com/metabrainz/libmusicbrainz/pull/22): replace libneon with libcurl, reuse connections, and set curl up on first use (the `msvc-fixes` branch is based on it) | open |
 | cyanrip | [cyanrip#153](https://github.com/cyanreg/cyanrip/pull/153): complete pregap detection (the `msvc` branch is based on it) | open |
 | cyanrip | [cyanrip#170](https://github.com/cyanreg/cyanrip/pull/170): rip disc images without paranoia by default | open |
 | cyanrip | [cyanrip#173](https://github.com/cyanreg/cyanrip/pull/173): don't embed cover art FFmpeg can't read | open |
@@ -46,7 +47,6 @@ Still only in the branches here:
   - the Meson builds, and their fixes for static linking with `prefer_static`;
   - the export macros.
 - libmusicbrainz:
-  - the libcurl port;
   - the MSVC fixes and export macros;
   - static linking of curl and libxml2 with their own dependencies.
 - cyanrip:
