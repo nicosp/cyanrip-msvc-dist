@@ -106,6 +106,13 @@ jobs:
 
       - uses: ilammy/msvc-dev-cmd@v1
 
+      # FFmpeg's build, with the runner's MSYS2 in C:\msys64
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MSYS
+          release: false
+          install: make nasm diffutils
+
       - name: Get the vcpkg version
         id: vcpkg
         run: |
@@ -115,18 +122,19 @@ jobs:
       - uses: actions/cache/restore@v4
         with:
           path: vcpkg-cache
-          key: vcpkg-msvc-static-${{ steps.vcpkg.outputs.commit }}-ffmpeg-lame-vorbis-opus-curl-libxml2-qrencode-chromaprint
+          key: vcpkg-msvc-static-${{ steps.vcpkg.outputs.commit }}-lame-vorbis-opus-zlib-curl-libxml2-qrencode-chromaprint
           restore-keys: vcpkg-msvc-static-${{ steps.vcpkg.outputs.commit }}-
 
       - name: Build
         run: scripts/build-msvc.ps1 -Static
 
-      # Even when the build fails, so the next run doesn't rebuild FFmpeg
+      # Even when the build fails, so the next run doesn't rebuild the
+      # vcpkg packages
       - uses: actions/cache/save@v4
         if: always()
         with:
           path: vcpkg-cache
-          key: vcpkg-msvc-static-${{ steps.vcpkg.outputs.commit }}-ffmpeg-lame-vorbis-opus-curl-libxml2-qrencode-chromaprint
+          key: vcpkg-msvc-static-${{ steps.vcpkg.outputs.commit }}-lame-vorbis-opus-zlib-curl-libxml2-qrencode-chromaprint
 
       - uses: actions/upload-artifact@v4
         with:

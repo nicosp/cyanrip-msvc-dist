@@ -125,7 +125,10 @@ cyanrip's tests.
 
 `scripts\build-msvc.ps1 -Static` does the same with MSVC: vcpkg's
 `x64-windows-static` triplet and the static CRT, giving
-`dist\cyanrip-windows-x86_64-msvc.exe`, which needs no DLLs.
+`dist\cyanrip-windows-x86_64-msvc.exe`, which needs no DLLs. It builds
+FFmpeg from source with MSVC, with the same features as the other builds
+(`scripts/ffmpeg-features.sh`), from MSYS2's bash; MSYS2 needs `make`,
+`nasm` and `diffutils`.
 
 `.github/workflows/release.yml` builds all four:
 

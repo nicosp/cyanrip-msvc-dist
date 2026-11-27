@@ -15,8 +15,10 @@ built against.
 
 With -Static everything is linked statically, with the static CRT, into
 one cyanrip.exe that needs no DLLs; it's copied to
-dist\cyanrip-windows-x86_64-msvc.exe.  FFmpeg then also gets LAME, Vorbis
-and Opus, like the other release builds.
+dist\cyanrip-windows-x86_64-msvc.exe.  FFmpeg is then built from source
+instead, with only the features cyanrip needs, as in the other release
+builds (see ffmpeg-features.sh).  That needs MSYS2 in MSYS2_ROOT
+(default C:\msys64), with make, nasm and diffutils.
 #>
 param(
     [switch]$Static,
@@ -76,18 +78,39 @@ Write-Host "Using vcpkg in $vcpkgRoot"
 if (Get-Command pkgconf -ErrorAction SilentlyContinue) { $env:PKG_CONFIG = 'pkgconf' }
 
 # Dependencies from vcpkg.  FFmpeg needs zlib for PNG cover art, and
-# ffprobe for some of the tests.
-$ffmpegFeatures = 'core,avcodec,avformat,avfilter,swresample,zlib,ffprobe'
-if ($Static) { $ffmpegFeatures += ',mp3lame,vorbis,opus' }
+# ffprobe for some of the tests.  Statically, FFmpeg is built below, with
+# its libraries from vcpkg.
+$packages = @('curl', 'libxml2', 'libqrencode', 'chromaprint')
+if ($Static) {
+    $packages += @('mp3lame', 'libvorbis', 'opus', 'zlib')
+} else {
+    $packages += 'ffmpeg[core,avcodec,avformat,avfilter,swresample,zlib,ffprobe]'
+}
 if (-not $SkipVcpkg) {
-    Invoke-Checked (Join-Path $vcpkgRoot 'vcpkg') install --triplet $Triplet `
-        "ffmpeg[$ffmpegFeatures]" curl libxml2 libqrencode chromaprint
+    Invoke-Checked (Join-Path $vcpkgRoot 'vcpkg') install --triplet $Triplet @packages
 }
 $vcpkg = Join-Path $vcpkgRoot "installed\$Triplet"
 $env:PKG_CONFIG_PATH = "$Prefix\lib\pkgconfig;$vcpkg\lib\pkgconfig"
 $env:INCLUDE = "$vcpkg\include;$env:INCLUDE"
 $env:LIB = "$vcpkg\lib;$env:LIB"
 $env:PATH = "$Prefix\bin;$vcpkg\bin;$vcpkg\tools\ffmpeg;$env:PATH"
+
+# FFmpeg, statically: with MSVC from MSYS2's bash, through the Windows
+# pkgconf so that cl gets Windows paths, and with MSVC's link.exe rather
+# than MSYS2's
+if ($Static) {
+    $msys2 = if ($env:MSYS2_ROOT) { $env:MSYS2_ROOT } else { 'C:\msys64' }
+    $bash = Join-Path $msys2 'usr\bin\bash.exe'
+    if (-not (Test-Path $bash)) { throw "MSYS2's bash not found in ${msys2}: set MSYS2_ROOT" }
+    $pkgconf = (Get-Command pkgconf -ErrorAction Stop).Source
+    $link = Get-Command link.exe -All -CommandType Application |
+        Where-Object { $_.Source -like '*\VC\Tools\MSVC\*' } | Select-Object -First 1
+    if (-not $link) { throw "MSVC's link.exe not found on PATH" }
+    $env:MSYS2_PATH_TYPE = 'inherit'
+    $env:CHERE_INVOKING = '1'
+    Invoke-Checked $bash -l (($root -replace '\\', '/') + '/scripts/build-ffmpeg-msvc.sh') `
+        $Prefix "$BuildDir\ffmpeg" $pkgconf $link.Source
+}
 
 # libcdio
 Invoke-MesonSetup "$BuildDir\libcdio" "$root\libcdio-C" @(

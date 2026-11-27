@@ -29,10 +29,12 @@ LAME_VERSION=4.0
 LIBOGG_VERSION=1.3.6
 LIBVORBIS_VERSION=1.3.7
 OPUS_VERSION=1.6.1
-FFMPEG_VERSION=9.0.2
 OPENSSL_VERSION=4.0.3
 LIBXML2_VERSION=2.15.4
 CHROMAPRINT_VERSION=1.6.2
+
+# FFMPEG_VERSION and FFMPEG_FEATURES
+source "$(dirname "$0")/ffmpeg-features.sh"
 
 build_all() {
     [[ $OS == darwin ]] && build_openssl
@@ -251,21 +253,9 @@ build_ffmpeg() {
     local extra=()
     [[ $OS == windows ]] && extra+=(--extra-ldflags=-static)
     do_tarball "https://ffmpeg.org/releases/ffmpeg-$FFMPEG_VERSION.tar.xz" "ffmpeg-$FFMPEG_VERSION"
-    # The same features as cyanrip's own static builds
     ./configure --prefix="$PREFIX" --pkg-config-flags=--static \
         --disable-shared --enable-static "${extra[@]}" \
-        --disable-{programs,devices,filters,decoders,hwaccels,encoders,muxers} \
-        --disable-{debug,protocols,demuxers,parsers,doc,swscale,network} \
-        --disable-{avdevice,autodetect} \
-        --disable-bsfs --enable-protocol=file,data \
-        --enable-encoder=flac,tta,aac,wavpack,alac,pcm_s16le,pcm_s32le,pcm_f64le \
-        --enable-muxer=flac,tta,ipod,wv,mp3,opus,ogg,wav,pcm_s16le,pcm_s32le,image2,singlejpeg \
-        --enable-parser=png,mjpeg --enable-decoder=mjpeg,png \
-        --enable-demuxer={image2,image_jpeg_pipe,image_png_pipe} \
-        --enable-{bzlib,zlib,iconv} \
-        --enable-filter={hdcd,aemphasis,ebur128,anullsink,aresample} \
-        --enable-lib{mp3lame,vorbis,opus} \
-        --enable-encoder={libmp3lame,libvorbis,libopus}
+        "${FFMPEG_FEATURES[@]}" --enable-{bzlib,iconv}
     make -j"$JOBS"
     make install
 }
