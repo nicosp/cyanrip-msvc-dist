@@ -18,7 +18,8 @@ one cyanrip.exe that needs no DLLs; it's copied to
 dist\cyanrip-windows-x86_64-msvc.exe.  FFmpeg is then built from source
 instead, with only the features cyanrip needs, as in the other release
 builds (see ffmpeg-features.sh).  That needs MSYS2 in MSYS2_ROOT
-(default C:\msys64), with make, nasm and diffutils.
+(default C:\msys64), with make, nasm and diffutils.  chromaprint, whose
+vcpkg port needs vcpkg's FFmpeg, is built from source too.
 #>
 param(
     [switch]$Static,
@@ -80,11 +81,12 @@ if (Get-Command pkgconf -ErrorAction SilentlyContinue) { $env:PKG_CONFIG = 'pkgc
 # Dependencies from vcpkg.  FFmpeg needs zlib for PNG cover art, and
 # ffprobe for some of the tests.  Statically, FFmpeg is built below, with
 # its libraries from vcpkg.
-$packages = @('curl', 'libxml2', 'libqrencode', 'chromaprint')
+$packages = @('curl', 'libxml2', 'libqrencode')
 if ($Static) {
+    # vcpkg's chromaprint port needs its FFmpeg: chromaprint is built below
     $packages += @('mp3lame', 'libvorbis', 'opus', 'zlib')
 } else {
-    $packages += 'ffmpeg[core,avcodec,avformat,avfilter,swresample,zlib,ffprobe]'
+    $packages += @('ffmpeg[core,avcodec,avformat,avfilter,swresample,zlib,ffprobe]', 'chromaprint')
 }
 if (-not $SkipVcpkg) {
     Invoke-Checked (Join-Path $vcpkgRoot 'vcpkg') install --triplet $Triplet @packages
@@ -110,6 +112,24 @@ if ($Static) {
     $env:CHERE_INVOKING = '1'
     Invoke-Checked $bash -l (($root -replace '\\', '/') + '/scripts/build-ffmpeg-msvc.sh') `
         $Prefix "$BuildDir\ffmpeg" $pkgconf $link.Source
+
+    # chromaprint, with its bundled KissFFT, as in build-static.sh
+    $chromaprintVersion = '1.6.2'
+    $chromaprintSrc = Join-Path $BuildDir "chromaprint-$chromaprintVersion"
+    if (-not (Test-Path $chromaprintSrc)) {
+        Invoke-WebRequest -OutFile "$chromaprintSrc.tar.gz" `
+            "https://github.com/acoustid/chromaprint/releases/download/v$chromaprintVersion/chromaprint-$chromaprintVersion.tar.gz"
+        # Windows' tar: Git's would take D: for a remote host
+        Invoke-Checked "$env:SystemRoot\System32\tar.exe" -xzf "$chromaprintSrc.tar.gz" -C $BuildDir
+    }
+    Invoke-Checked cmake -S $chromaprintSrc -B "$BuildDir\chromaprint" -G Ninja `
+        -DCMAKE_BUILD_TYPE=Release "-DCMAKE_INSTALL_PREFIX=$($Prefix -replace '\\', '/')" `
+        -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded `
+        -DBUILD_SHARED_LIBS=OFF -DFFT_LIB=kissfft `
+        "-DKISSFFT_SOURCE_DIR=$($chromaprintSrc -replace '\\', '/')/src/3rdparty/kissfft" `
+        -DBUILD_TOOLS=OFF -DBUILD_TESTS=OFF
+    Invoke-Checked cmake --build "$BuildDir\chromaprint"
+    Invoke-Checked cmake --install "$BuildDir\chromaprint"
 }
 
 # libcdio
@@ -143,11 +163,12 @@ Invoke-Checked cmake --build "$BuildDir\libmusicbrainz" --target musicbrainz5 mu
 Invoke-Checked cmake --install "$BuildDir\libmusicbrainz"
 
 # cyanrip, whose version gets the +npN of RELEASE_TAG (e.g. v0.9.4-rc3+np3),
-# or +np without one.  Statically, curl's headers must be told so.
+# or +np without one.  Statically, curl's and chromaprint's headers must be
+# told so.
 $versionSuffix = '+np'
 if ($env:RELEASE_TAG -match '\+(.+)$') { $versionSuffix = "+$($Matches[1])" }
 $cyanripOptions = @("-Dversion_suffix=$versionSuffix")
-if ($Static) { $cyanripOptions += '-Dc_args=-DCURL_STATICLIB' }
+if ($Static) { $cyanripOptions += '-Dc_args=-DCURL_STATICLIB -DCHROMAPRINT_NODLL' }
 Invoke-MesonSetup "$BuildDir\cyanrip" "$root\cyanrip" $cyanripOptions
 Invoke-Checked meson compile -C "$BuildDir\cyanrip"
 Invoke-Checked meson install -C "$BuildDir\cyanrip"
