@@ -137,6 +137,16 @@ It uploads them as artifacts and attaches them to the GitHub release
 when one is published. Run it by hand to get the artifacts without a
 release.
 
+The macOS binary is signed ad hoc only, not with an Apple Developer ID.
+When it's downloaded with a browser, macOS quarantines it, and Gatekeeper
+then refuses to open it. To run it, mark it executable and remove the
+quarantine attribute:
+
+```sh
+chmod +x cyanrip-darwin-aarch64
+xattr -d com.apple.quarantine cyanrip-darwin-aarch64
+```
+
 ## CI
 
 `.github/workflows/build.yml` runs both scripts on GitHub's Windows
