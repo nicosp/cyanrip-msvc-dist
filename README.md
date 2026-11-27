@@ -44,7 +44,7 @@ Still only in the branches here:
 - libcdio and libcdio-paranoia:
   - the Meson builds, and their fixes for static linking with `prefer_static`;
   - the export macros;
-  - a fallback for Wine, which doesn't implement `IOCTL_CDROM_GET_LAST_SESSION`; it is also on its own branch, `win32-last-session-fallback`, and isn't proposed upstream.
+  - a workaround for Wine missing `IOCTL_CDROM_GET_LAST_SESSION`.
 - libmusicbrainz:
   - the libcurl port;
   - the MSVC fixes and export macros;
