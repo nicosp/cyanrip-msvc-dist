@@ -119,9 +119,12 @@ Remove-Item Env:CXXFLAGS -ErrorAction SilentlyContinue
 Invoke-Checked cmake --build "$BuildDir\libmusicbrainz" --target musicbrainz5 musicbrainz5cc
 Invoke-Checked cmake --install "$BuildDir\libmusicbrainz"
 
-# cyanrip.  Statically, curl's headers must be told so.
-$cyanripOptions = @()
-if ($Static) { $cyanripOptions = @('-Dc_args=-DCURL_STATICLIB') }
+# cyanrip, whose version gets the +npN of RELEASE_TAG (e.g. v0.9.4-rc3+np3),
+# or +np without one.  Statically, curl's headers must be told so.
+$versionSuffix = '+np'
+if ($env:RELEASE_TAG -match '\+(.+)$') { $versionSuffix = "+$($Matches[1])" }
+$cyanripOptions = @("-Dversion_suffix=$versionSuffix")
+if ($Static) { $cyanripOptions += '-Dc_args=-DCURL_STATICLIB' }
 Invoke-MesonSetup "$BuildDir\cyanrip" "$root\cyanrip" $cyanripOptions
 Invoke-Checked meson compile -C "$BuildDir\cyanrip"
 Invoke-Checked meson install -C "$BuildDir\cyanrip"

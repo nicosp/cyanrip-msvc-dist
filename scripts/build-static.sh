@@ -14,6 +14,9 @@
 # libxml2 with their static libraries too (see .github/workflows/release.yml
 # for the packages on each platform).
 #
+# cyanrip's version gets the +npN of RELEASE_TAG (e.g. v0.9.4-rc3+np3), or
+# +np without one.
+#
 # The binary is written to dist/cyanrip-<os>-<arch>[.exe].  With arguments,
 # only the named steps run (e.g. build_ffmpeg build_cyanrip), for iterating
 # on one of them.
@@ -276,9 +279,13 @@ build_cyanrip() {
     fi
     [[ $OS == windows ]] && exe=.exe
 
+    local suffix=+np
+    [[ ${RELEASE_TAG:-} == *+* ]] && suffix="+${RELEASE_TAG#*+}"
+
     rm -rf "${BUILD:?}/cyanrip"
     meson setup "$(native "$BUILD/cyanrip")" "$(native "$ROOT/cyanrip")" \
-        --buildtype=release --default-library=static --prefer-static "${link_args[@]}"
+        --buildtype=release --default-library=static --prefer-static "${link_args[@]}" \
+        "-Dversion_suffix=$suffix"
     meson compile -C "$(native "$BUILD/cyanrip")"
     if [[ ${SKIP_TESTS:-0} != 1 ]]; then
         meson test -C "$(native "$BUILD/cyanrip")" --print-errorlogs

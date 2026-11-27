@@ -12,6 +12,8 @@
 #   BUILDTYPE     Meson build type (default release)
 #   INSTALL_DEPS  0 to skip installing the MSYS2 packages
 #   SKIP_TESTS    1 to skip cyanrip's tests
+#   RELEASE_TAG   cyanrip's version gets its +npN (e.g. v0.9.4-rc3+np3),
+#                 or +np without one
 
 set -euo pipefail
 
@@ -77,7 +79,9 @@ run cmake --build "$(win "$build/libmusicbrainz")" --target musicbrainz5 musicbr
 run cmake --install "$(win "$build/libmusicbrainz")"
 
 # cyanrip
-meson_setup "$build/cyanrip" "$root/cyanrip"
+suffix=+np
+[[ ${RELEASE_TAG:-} == *+* ]] && suffix="+${RELEASE_TAG#*+}"
+meson_setup "$build/cyanrip" "$root/cyanrip" "-Dversion_suffix=$suffix"
 run meson compile -C "$(win "$build/cyanrip")"
 run meson install -C "$(win "$build/cyanrip")"
 
