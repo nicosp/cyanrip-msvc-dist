@@ -4,12 +4,13 @@
 # the Visual Studio environment inherited (MSYS2_PATH_TYPE=inherit); MSYS2
 # needs make, nasm and diffutils.
 #
-#   build-ffmpeg-msvc.sh PREFIX BUILD_DIR PKGCONF MSVC_LINK
+#   build-ffmpeg-msvc.sh PREFIX BUILD_DIR PKGCONF PKG_CONFIG_PATH MSVC_LINK
 #
-# LAME, Vorbis, Opus and zlib are found with PKGCONF, the Windows pkgconf
-# that build-msvc.ps1 uses, through its PKG_CONFIG_PATH, so that cl gets
-# Windows paths.  MSVC_LINK is the path of MSVC's link.exe: its directory
-# goes first on PATH, so that MSYS2's own link doesn't hide it.
+# Vorbis, Opus and zlib are found with PKGCONF, the Windows pkgconf that
+# build-msvc.ps1 uses, in PKG_CONFIG_PATH (a Windows path list, which the
+# login shell's profile would replace), so that cl gets Windows paths.
+# MSVC_LINK is the path of MSVC's link.exe: its directory goes first on
+# PATH, so that MSYS2's own link doesn't hide it.
 
 set -eo pipefail
 
@@ -17,7 +18,8 @@ set -eo pipefail
 prefix=$(cygpath -m "$1")
 build=$(cygpath -u "$2")
 pkgconf=$(cygpath -u "$3")
-export PATH="$(dirname "$(cygpath -u "$4")"):$PATH"
+export PKG_CONFIG_PATH="$4"
+export PATH="$(dirname "$(cygpath -u "$5")"):$PATH"
 
 source "$(dirname "$0")/ffmpeg-features.sh"
 

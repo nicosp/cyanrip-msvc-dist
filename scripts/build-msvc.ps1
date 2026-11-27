@@ -117,7 +117,7 @@ if ($Static) {
     $env:MSYS2_PATH_TYPE = 'inherit'
     $env:CHERE_INVOKING = '1'
     Invoke-Checked $bash -l (($root -replace '\\', '/') + '/scripts/build-ffmpeg-msvc.sh') `
-        $Prefix "$BuildDir\ffmpeg" $pkgconf $link.Source
+        $Prefix "$BuildDir\ffmpeg" $pkgconf $env:PKG_CONFIG_PATH $link.Source
 
     # chromaprint, with its bundled KissFFT, as in build-static.sh
     $chromaprintVersion = '1.6.2'
