@@ -41,6 +41,7 @@ Proposed upstream so far:
 | libcdio | [libcdio-C#131](https://github.com/libcdio/libcdio-C/pull/131): read the CD-TEXT that `cdrdao read-toc` writes | open |
 | libcdio | [libcdio-C#132](https://github.com/libcdio/libcdio-C/pull/132): read a CD-Extra's TOC on Windows, and fail MMC commands the drive rejects | open |
 | libcdio | [libcdio-C#133](https://github.com/libcdio/libcdio-C/pull/133): ask the drive for the last session, MCN and ISRCs, for Wine, which lacks or half-implements the ioctls | open |
+| libcdio-paranoia | [libcdio-paranoia#64](https://github.com/libcdio/libcdio-paranoia/pull/64): declare `getopt` with its prototype, for C23 compilers | merged |
 | libcdio-paranoia | [libcdio-paranoia#65](https://github.com/libcdio/libcdio-paranoia/pull/65): `jitter_read` doesn't use bytes the read didn't fill | open |
 | libcdio-paranoia | [libcdio-paranoia#66](https://github.com/libcdio/libcdio-paranoia/pull/66): build with MSVC | open |
 | libcdio-paranoia | [libcdio-paranoia#68](https://github.com/libcdio/libcdio-paranoia/pull/68): LF line endings on Windows, and `pod2c.pl` stripping CRLF | merged |
