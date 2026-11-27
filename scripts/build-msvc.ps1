@@ -108,6 +108,12 @@ if ($Static) {
     $link = Get-Command link.exe -All -CommandType Application |
         Where-Object { $_.Source -like '*\VC\Tools\MSVC\*' } | Select-Object -First 1
     if (-not $link) { throw "MSVC's link.exe not found on PATH" }
+    # FFmpeg links LAME as mp3lame.lib, which vcpkg's static port installs
+    # in two parts, under other names
+    New-Item -ItemType Directory -Force "$Prefix\lib" | Out-Null
+    Invoke-Checked lib.exe -nologo "-out:$Prefix\lib\mp3lame.lib" `
+        "$vcpkg\lib\libmp3lame-static.lib" "$vcpkg\lib\libmpghip-static.lib"
+    $env:LIB = "$Prefix\lib;$env:LIB"
     $env:MSYS2_PATH_TYPE = 'inherit'
     $env:CHERE_INVOKING = '1'
     Invoke-Checked $bash -l (($root -replace '\\', '/') + '/scripts/build-ffmpeg-msvc.sh') `
