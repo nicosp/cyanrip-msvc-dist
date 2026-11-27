@@ -36,3 +36,7 @@ cd "ffmpeg-$FFMPEG_VERSION"
     { tail -n 40 ffbuild/config.log; exit 1; }
 make -j"$(nproc)"
 make install
+
+# configure turns the -L of the libraries' .pc files into MSVC's -libpath:,
+# which pkg-config users such as Meson read as -l; turn it back
+sed -i 's/-libpath:/-L/g' "$(cygpath -u "$prefix")"/lib/pkgconfig/lib{avcodec,avformat,avfilter,avutil,swresample}.pc
