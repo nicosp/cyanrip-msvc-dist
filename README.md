@@ -1,24 +1,33 @@
-# cyanrip for Windows: MSVC and MinGW builds
+# Static cyanrip builds for Linux, macOS and Windows (MSVC and MinGW)
 
-> **This is an experiment.** It is a place to work out first-class
-> support for [cyanrip](https://github.com/cyanreg/cyanrip) on Windows
-> with MSVC, alongside MinGW, across cyanrip and the libraries it needs.
-> Once all of the changes below are upstreamed, this repository will be
-> archived or deleted. Build from the upstream projects then.
+> **This is an experiment.** Besides publishing the binaries, its goal is
+> to get every fix it needs into the upstream projects: cyanrip, libcdio,
+> libcdio-paranoia and libmusicbrainz. Once they are all upstreamed, this
+> repository will be archived or deleted. Build from the upstream projects
+> then.
 
-This repository builds cyanrip and the libraries it needs from the
-branches that let them build with MSVC, and runs cyanrip's tests. Each
+This repository builds static [cyanrip](https://github.com/cyanreg/cyanrip)
+binaries for Linux (x86-64, musl), macOS (arm64) and Windows (x86-64, with
+both MSVC and MinGW UCRT64). They're built from branches of cyanrip and
+the libraries it needs, which carry the fixes not yet upstream. Each
 library is a submodule:
 
 | Submodule | Branch | What it adds |
 |---|---|---|
-| `libcdio-C` | `export-macros` | Meson build; symbols exported through `CDIO_PUBLIC` and friends, so MSVC can build DLLs |
+| `libcdio-C` | `export-macros` | Meson build; symbols exported through `CDIO_PUBLIC` and friends, so MSVC can build DLLs; reading CDs on Windows and under Wine (TOC, sessions, MCN and ISRCs) |
 | `libcdio-paranoia` | `meson-export-symbols` | The same for libcdio-paranoia; binary audio output on Windows |
 | `libmusicbrainz` | `msvc-fixes` | libcurl instead of neon (`curl-port`); MSVC fixes and export macros; DLLs installed in `bin` |
-| `cyanrip` | `msvc` | MSVC build; backslashes in paths; unreadable cover art not embedded |
+| `cyanrip` | `msvc` | MSVC build; backslashes in paths; unreadable cover art not embedded; every track's ISRC; `+npN` after the version |
 
-The same branches are built with MinGW as well, so neither toolchain
-regresses.
+## Testing
+
+- **CI:** every build runs cyanrip's test suite, including rips of disc
+  images. The release builds are static; the CI workflow also makes
+  dynamic MSVC and MinGW builds, so that neither toolchain regresses.
+- **Real discs:** before a release, the Linux build rips a CD in a real
+  drive, and the Windows builds rip the same CD under Wine. The rips are
+  compared sample for sample, and checked against AccurateRip.
+- The macOS build is only built and tested in CI, not run on a real drive.
 
 ## Upstream status
 
@@ -26,11 +35,11 @@ Proposed upstream so far:
 
 | Project | Change | Status |
 |---|---|---|
-| libcdio | [libcdio-C#127](https://github.com/libcdio/libcdio-C/issues/127): a Meson build alongside autotools | proposed |
+| libcdio | [libcdio-C#127](https://github.com/libcdio/libcdio-C/issues/127): a Meson build alongside autotools | agreed; PR to follow once the open PRs are reviewed |
 | libcdio | [libcdio-C#130](https://github.com/libcdio/libcdio-C/pull/130): find a CUE sheet's files next to it on Windows | open |
 | libcdio | [libcdio-C#131](https://github.com/libcdio/libcdio-C/pull/131): read the CD-TEXT that `cdrdao read-toc` writes | open |
 | libcdio | [libcdio-C#132](https://github.com/libcdio/libcdio-C/pull/132): read a CD-Extra's TOC on Windows, and fail MMC commands the drive rejects | open |
-| libcdio | [libcdio-C#133](https://github.com/libcdio/libcdio-C/pull/133): a workaround for Wine missing `IOCTL_CDROM_GET_LAST_SESSION` | open |
+| libcdio | [libcdio-C#133](https://github.com/libcdio/libcdio-C/pull/133): ask the drive for the last session, MCN and ISRCs, for Wine, which lacks or half-implements the ioctls | open |
 | libcdio-paranoia | [libcdio-paranoia#66](https://github.com/libcdio/libcdio-paranoia/pull/66): build with MSVC | open |
 | libcdio-paranoia | [libcdio-paranoia#68](https://github.com/libcdio/libcdio-paranoia/pull/68): LF line endings on Windows, and `pod2c.pl` stripping CRLF | merged |
 | libmusicbrainz | [libmusicbrainz#22](https://github.com/metabrainz/libmusicbrainz/pull/22): replace libneon with libcurl, reuse connections, and set curl up on first use (the `msvc-fixes` branch is based on it) | open |
