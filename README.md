@@ -36,10 +36,12 @@ Proposed upstream so far:
 | Project | Change | Status |
 |---|---|---|
 | libcdio | [libcdio-C#127](https://github.com/libcdio/libcdio-C/issues/127): a Meson build alongside autotools | agreed; PR to follow once the open PRs are reviewed |
+| libcdio | [libcdio-C#128](https://github.com/libcdio/libcdio-C/pull/128): define `iso9660_find_fs_lsn` on every platform, and deprecate it | open |
 | libcdio | [libcdio-C#130](https://github.com/libcdio/libcdio-C/pull/130): find a CUE sheet's files next to it on Windows | open |
 | libcdio | [libcdio-C#131](https://github.com/libcdio/libcdio-C/pull/131): read the CD-TEXT that `cdrdao read-toc` writes | open |
 | libcdio | [libcdio-C#132](https://github.com/libcdio/libcdio-C/pull/132): read a CD-Extra's TOC on Windows, and fail MMC commands the drive rejects | open |
 | libcdio | [libcdio-C#133](https://github.com/libcdio/libcdio-C/pull/133): ask the drive for the last session, MCN and ISRCs, for Wine, which lacks or half-implements the ioctls | open |
+| libcdio-paranoia | [libcdio-paranoia#65](https://github.com/libcdio/libcdio-paranoia/pull/65): `jitter_read` doesn't use bytes the read didn't fill | open |
 | libcdio-paranoia | [libcdio-paranoia#66](https://github.com/libcdio/libcdio-paranoia/pull/66): build with MSVC | open |
 | libcdio-paranoia | [libcdio-paranoia#68](https://github.com/libcdio/libcdio-paranoia/pull/68): LF line endings on Windows, and `pod2c.pl` stripping CRLF | merged |
 | libmusicbrainz | [libmusicbrainz#22](https://github.com/metabrainz/libmusicbrainz/pull/22): replace libneon with libcurl, reuse connections, and set curl up on first use (the `msvc-fixes` branch is based on it) | open |
