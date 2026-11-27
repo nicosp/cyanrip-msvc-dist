@@ -40,6 +40,7 @@ Proposed upstream so far:
 | cyanrip | [cyanrip#174](https://github.com/cyanreg/cyanrip/pull/174): run the image tests in Python's UTF-8 mode | open |
 | cyanrip | [cyanrip#175](https://github.com/cyanreg/cyanrip/pull/175): FIFO waits re-check their condition after waking | open |
 | cyanrip | [cyanrip#176](https://github.com/cyanreg/cyanrip/pull/176): keep the drive offset search within its buffer and radius | open |
+| cyanrip | [cyanrip#177](https://github.com/cyanreg/cyanrip/pull/177): read the ISRC of every track | open |
 
 Still only in the branches here:
 
