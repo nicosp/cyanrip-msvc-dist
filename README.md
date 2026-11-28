@@ -9,15 +9,17 @@
 This repository builds static [cyanrip](https://github.com/cyanreg/cyanrip)
 binaries for Linux (x86-64, musl), macOS (arm64) and Windows (x86-64, with
 both MSVC and MinGW UCRT64). They're built from branches of cyanrip and
-the libraries it needs, which carry the fixes not yet upstream. Each
-library is a submodule:
+the libraries it needs, which carry the fixes not yet upstream. Among
+them is complete pregap detection
+([cyanrip#153](https://github.com/cyanreg/cyanrip/pull/153)), which
+upstream's builds don't have yet. Each library is a submodule:
 
 | Submodule | Branch | What it adds |
 |---|---|---|
 | `libcdio-C` | `export-macros` | Meson build; symbols exported through `CDIO_PUBLIC` and friends, so MSVC can build DLLs; reading CDs on Windows and under Wine (TOC, sessions, MCN and ISRCs) |
 | `libcdio-paranoia` | `meson-export-symbols` | The same for libcdio-paranoia; binary audio output on Windows |
 | `libmusicbrainz` | `msvc-fixes` | libcurl instead of neon (`curl-port`); MSVC fixes and export macros; DLLs installed in `bin` |
-| `cyanrip` | `msvc` | MSVC build; backslashes in paths; unreadable cover art not embedded; every track's ISRC; `+npN` after the version |
+| `cyanrip` | `msvc` | Complete pregap detection; MSVC build; backslashes in paths; unreadable cover art not embedded; every track's ISRC; `+npN` after the version |
 
 ## Testing
 
