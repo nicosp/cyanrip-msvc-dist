@@ -31,31 +31,9 @@ library is a submodule:
 
 ## Upstream status
 
-Proposed upstream so far:
+### Not yet proposed
 
-| Project | Change | Status |
-|---|---|---|
-| libcdio | [libcdio-C#127](https://github.com/libcdio/libcdio-C/issues/127): a Meson build alongside autotools | agreed; PR to follow once the open PRs are reviewed |
-| libcdio | [libcdio-C#128](https://github.com/libcdio/libcdio-C/pull/128): define `iso9660_find_fs_lsn` on every platform, and deprecate it | open |
-| libcdio | [libcdio-C#129](https://github.com/libcdio/libcdio-C/pull/129): keep Linux TOC reads within the track arrays | merged |
-| libcdio | [libcdio-C#130](https://github.com/libcdio/libcdio-C/pull/130): find a CUE sheet's files next to it on Windows | open |
-| libcdio | [libcdio-C#131](https://github.com/libcdio/libcdio-C/pull/131): read the CD-TEXT that `cdrdao read-toc` writes | open |
-| libcdio | [libcdio-C#132](https://github.com/libcdio/libcdio-C/pull/132): read a CD-Extra's TOC on Windows, and fail MMC commands the drive rejects | merged |
-| libcdio | [libcdio-C#133](https://github.com/libcdio/libcdio-C/pull/133): ask the drive for the last session, MCN and ISRCs, for Wine, which lacks or half-implements the ioctls | open |
-| libcdio-paranoia | [libcdio-paranoia#64](https://github.com/libcdio/libcdio-paranoia/pull/64): declare `getopt` with its prototype, for C23 compilers | merged |
-| libcdio-paranoia | [libcdio-paranoia#65](https://github.com/libcdio/libcdio-paranoia/pull/65): `jitter_read` doesn't use bytes the read didn't fill | open |
-| libcdio-paranoia | [libcdio-paranoia#66](https://github.com/libcdio/libcdio-paranoia/pull/66): build with MSVC | open |
-| libcdio-paranoia | [libcdio-paranoia#68](https://github.com/libcdio/libcdio-paranoia/pull/68): LF line endings on Windows, and `pod2c.pl` stripping CRLF | merged |
-| libmusicbrainz | [libmusicbrainz#22](https://github.com/metabrainz/libmusicbrainz/pull/22): replace libneon with libcurl, reuse connections, and set curl up on first use (the `msvc-fixes` branch is based on it) | open |
-| cyanrip | [cyanrip#153](https://github.com/cyanreg/cyanrip/pull/153): complete pregap detection (the `msvc` branch is based on it) | open |
-| cyanrip | [cyanrip#170](https://github.com/cyanreg/cyanrip/pull/170): rip disc images without paranoia by default | open |
-| cyanrip | [cyanrip#173](https://github.com/cyanreg/cyanrip/pull/173): don't embed cover art FFmpeg can't read | open |
-| cyanrip | [cyanrip#174](https://github.com/cyanreg/cyanrip/pull/174): run the image tests in Python's UTF-8 mode | open |
-| cyanrip | [cyanrip#175](https://github.com/cyanreg/cyanrip/pull/175): FIFO waits re-check their condition after waking | open |
-| cyanrip | [cyanrip#176](https://github.com/cyanreg/cyanrip/pull/176): keep the drive offset search within its buffer and radius | open |
-| cyanrip | [cyanrip#177](https://github.com/cyanreg/cyanrip/pull/177): read the ISRC of every track | open |
-
-Still only in the branches here:
+Only in the branches here, so far:
 
 - libcdio and libcdio-paranoia:
   - the Meson builds, and their fixes for static linking with `prefer_static`;
@@ -66,6 +44,39 @@ Still only in the branches here:
 - cyanrip:
   - the MSVC build, including its Windows threads in place of pthreads4w;
   - splitting paths at backslashes on Windows.
+
+### Pending
+
+Proposed upstream, waiting for review or a merge:
+
+| Project | Change |
+|---|---|
+| libcdio | [libcdio-C#127](https://github.com/libcdio/libcdio-C/issues/127): a Meson build alongside autotools (agreed; PR to follow once the open PRs are reviewed) |
+| libcdio | [libcdio-C#128](https://github.com/libcdio/libcdio-C/pull/128): define `iso9660_find_fs_lsn` on every platform, and deprecate it |
+| libcdio | [libcdio-C#130](https://github.com/libcdio/libcdio-C/pull/130): find a CUE sheet's files next to it on Windows |
+| libcdio | [libcdio-C#131](https://github.com/libcdio/libcdio-C/pull/131): read the CD-TEXT that `cdrdao read-toc` writes |
+| libcdio | [libcdio-C#133](https://github.com/libcdio/libcdio-C/pull/133): ask the drive for the last session, MCN and ISRCs, for Wine, which lacks or half-implements the ioctls |
+| libcdio-paranoia | [libcdio-paranoia#65](https://github.com/libcdio/libcdio-paranoia/pull/65): `jitter_read` doesn't use bytes the read didn't fill |
+| libcdio-paranoia | [libcdio-paranoia#66](https://github.com/libcdio/libcdio-paranoia/pull/66): build with MSVC |
+| libmusicbrainz | [libmusicbrainz#22](https://github.com/metabrainz/libmusicbrainz/pull/22): replace libneon with libcurl, reuse connections, and set curl up on first use (the `msvc-fixes` branch is based on it) |
+| cyanrip | [cyanrip#153](https://github.com/cyanreg/cyanrip/pull/153): complete pregap detection (the `msvc` branch is based on it) |
+| cyanrip | [cyanrip#170](https://github.com/cyanreg/cyanrip/pull/170): rip disc images without paranoia by default |
+| cyanrip | [cyanrip#173](https://github.com/cyanreg/cyanrip/pull/173): don't embed cover art FFmpeg can't read |
+| cyanrip | [cyanrip#174](https://github.com/cyanreg/cyanrip/pull/174): run the image tests in Python's UTF-8 mode |
+| cyanrip | [cyanrip#175](https://github.com/cyanreg/cyanrip/pull/175): FIFO waits re-check their condition after waking |
+| cyanrip | [cyanrip#176](https://github.com/cyanreg/cyanrip/pull/176): keep the drive offset search within its buffer and radius |
+| cyanrip | [cyanrip#177](https://github.com/cyanreg/cyanrip/pull/177): read the ISRC of every track |
+
+### Merged
+
+In upstream now, so the branches no longer carry them as their own commits:
+
+| Project | Change |
+|---|---|
+| libcdio | [libcdio-C#129](https://github.com/libcdio/libcdio-C/pull/129): keep Linux TOC reads within the track arrays |
+| libcdio | [libcdio-C#132](https://github.com/libcdio/libcdio-C/pull/132): read a CD-Extra's TOC on Windows, and fail MMC commands the drive rejects |
+| libcdio-paranoia | [libcdio-paranoia#64](https://github.com/libcdio/libcdio-paranoia/pull/64): declare `getopt` with its prototype, for C23 compilers |
+| libcdio-paranoia | [libcdio-paranoia#68](https://github.com/libcdio/libcdio-paranoia/pull/68): LF line endings on Windows, and `pod2c.pl` stripping CRLF |
 
 ## Getting the sources
 
