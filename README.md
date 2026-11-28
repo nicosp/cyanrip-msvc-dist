@@ -37,9 +37,10 @@ Proposed upstream so far:
 |---|---|---|
 | libcdio | [libcdio-C#127](https://github.com/libcdio/libcdio-C/issues/127): a Meson build alongside autotools | agreed; PR to follow once the open PRs are reviewed |
 | libcdio | [libcdio-C#128](https://github.com/libcdio/libcdio-C/pull/128): define `iso9660_find_fs_lsn` on every platform, and deprecate it | open |
+| libcdio | [libcdio-C#129](https://github.com/libcdio/libcdio-C/pull/129): keep Linux TOC reads within the track arrays | merged |
 | libcdio | [libcdio-C#130](https://github.com/libcdio/libcdio-C/pull/130): find a CUE sheet's files next to it on Windows | open |
 | libcdio | [libcdio-C#131](https://github.com/libcdio/libcdio-C/pull/131): read the CD-TEXT that `cdrdao read-toc` writes | open |
-| libcdio | [libcdio-C#132](https://github.com/libcdio/libcdio-C/pull/132): read a CD-Extra's TOC on Windows, and fail MMC commands the drive rejects | open |
+| libcdio | [libcdio-C#132](https://github.com/libcdio/libcdio-C/pull/132): read a CD-Extra's TOC on Windows, and fail MMC commands the drive rejects | merged |
 | libcdio | [libcdio-C#133](https://github.com/libcdio/libcdio-C/pull/133): ask the drive for the last session, MCN and ISRCs, for Wine, which lacks or half-implements the ioctls | open |
 | libcdio-paranoia | [libcdio-paranoia#64](https://github.com/libcdio/libcdio-paranoia/pull/64): declare `getopt` with its prototype, for C23 compilers | merged |
 | libcdio-paranoia | [libcdio-paranoia#65](https://github.com/libcdio/libcdio-paranoia/pull/65): `jitter_read` doesn't use bytes the read didn't fill | open |
